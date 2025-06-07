@@ -59,12 +59,12 @@ view(faw.summary.stats)
 write.csv(x = faw.summary.stats, file = "/Users/user/Desktop/Data Science Library/Data for play/Fall-Armyworm-control--/Data/Fall_Armyworm_summary_stats.csv")
 
 
-faw.anova <- weekly_data %>%
-  mutate(Blend = str_extract(Treatment, "R\\d") %>% replace_na("Control"))
+faw.anova <- faw.weekly_clean %>%
+  pivot_longer(cols = starts_with("Week"), names_to = "Week", values_to = "Count")
 
 # Convert Week columns to numeric type in case they're not
-week_cols <- grep("Week", names(weekly_data), value = TRUE)
-weekly_data[week_cols] <- lapply(weekly_data[week_cols], as.numeric)
+week_cols <- grep("Week", names(faw.anova), value = TRUE)
+weekly_data[week_cols] <- lapply(faw.anova[week_cols], as.numeric)
 
 # Create a total weekly count column
 weekly_data <- weekly_data %>%
@@ -79,6 +79,13 @@ summary(faw.anova.model)
 faw.hsd <- HSD.test(faw.anova.model, "Treatment", group = TRUE)
 
 view(faw.hsd$groups)
+
+
+
+
+
+
+
 
 # Test for normality of data 
 qqnorm(farm_1$Count, main = "Normal Q-Q Plot for Farm 1")
