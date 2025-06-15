@@ -1,4 +1,5 @@
 # This script is for analysis of variance of the data both in overall and weekly manners 
+# 15 - 06 - 2025
 #Library required ----
 library(tidyverse)
 library(agricolae)
@@ -9,10 +10,10 @@ other.anova <- other.weekly_data %>%
          Week = factor(Week, levels = paste("Week", 1:6)))
 
 # Anova and HSD.test is here ----
-anova.m <- aov(Count ~ Treatment, data = other.anova, trt)
-summary(anova.m)
-HSD.test(anova.m, "Treatment", group = TRUE, unbalanced = TRUE)
-view(HSD.test(anova.m)$gr)
+other.anova.m <- aov(Count ~ Treatment, data = other.anova)
+summary(other.anova.m)
+other.anova.m.hsd <- HSD.test(other.anova.m, "Treatment", group = TRUE, unbalanced = TRUE)
+view(other.anova.m.hsd$groups)
 
 
 # Function to get HSD results for each week

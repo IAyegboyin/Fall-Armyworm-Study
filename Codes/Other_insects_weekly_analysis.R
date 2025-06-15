@@ -20,7 +20,7 @@ view(other.weekly)
 
 
 # Data Cleaning and Preparation ----
-faw.daily_clean <- faw.daily %>%
+other.daily_clean <- other.daily %>%
   mutate (
     Treatment = case_when(
       # Renaming treatments
@@ -31,9 +31,9 @@ faw.daily_clean <- faw.daily %>%
       TRUE ~ Treatment  # keeps original value if no match
     )
   )
-view(faw.daily_clean)
+view(other.daily_clean)
 
-faw.weekly_clean <- faw.weekly %>%
+other.weekly_clean <- other.weekly %>%
   mutate (
     Treatment = case_when(
       # Renaming treatments
@@ -44,15 +44,19 @@ faw.weekly_clean <- faw.weekly %>%
       TRUE ~ Treatment  # keeps original value if no match
     )
   )
-view(faw.weekly_clean)
+view(other.weekly_clean)
 
 # Descriptive Statistics starts here ----
-faw.summary.stats <- weekly_data %>%
+other.weekly_data <- other.weekly_clean %>%
+  pivot_longer(cols = starts_with("Week"), 
+               names_to = "Week", 
+               values_to = "Count")
+other.summary.stats <- other.weekly_data %>%
   group_by(Treatment, Week) %>%
   summarise(Mean = mean(Count, na.rm = TRUE), 
             SD = sd(Count, na.rm = TRUE),
             SEM = sd(Count)/sqrt(n()),
             .groups = 'drop')
-as.data.frame(faw.summary.stats)
-view(faw.summary.stats)
-write.csv(x = faw.summary.stats, file = "/Users/user/Desktop/Data Science Library/Data for play/Fall-Armyworm-control--/Data/Fall_Armyworm_summary_stats.csv")
+as.data.frame(other.summary.stats)
+view(other.summary.stats)
+write.csv(x = faw.summary.stats, file = "/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Other_Insects_summary_stats.csv")

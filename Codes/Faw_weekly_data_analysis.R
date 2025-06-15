@@ -47,6 +47,10 @@ faw.weekly_clean <- faw.weekly %>%
 view(faw.weekly_clean)
 
 # Descriptive Statistics starts here ----
+weekly_data <- faw.weekly_clean %>%
+  pivot_longer(cols = starts_with("Week"), 
+               names_to = "Week", 
+               values_to = "Count")
 faw.summary.stats <- weekly_data %>%
   group_by(Treatment, Week) %>%
   summarise(Mean = mean(Count, na.rm = TRUE), 
@@ -55,4 +59,4 @@ faw.summary.stats <- weekly_data %>%
             .groups = 'drop')
 as.data.frame(faw.summary.stats)
 view(faw.summary.stats)
-write.csv(x = faw.summary.stats, file = "/Users/user/Desktop/Data Science Library/Data for play/Fall-Armyworm-control--/Data/Fall_Armyworm_summary_stats.csv")
+write.csv(x = faw.summary.stats, file = "/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_summary_stats.csv")

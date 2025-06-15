@@ -69,6 +69,6 @@ ggplot(weekly.results, aes(x = Week, y = mean, fill = Treatment)) +
   geom_col(position = position_dodge(0.9), width = 0.8) +
   geom_text(aes(label = groups, y = mean + max(mean)*0.05), 
             position = position_dodge(0.9), size = 4) +
-  labs(x = "Week", y = "FAW Count", title = "WEEKLY ANOVA") +
+  labs(x = "Week", y = "FAW Count", title = "FAW WEEKLY ANOVA") +
   scale_fill_brewer(palette = "Set1") +
   theme_minimal()
