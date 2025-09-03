@@ -8,11 +8,9 @@ library(readxl)
 library(performance) # to check performance of the models
 library(MASS)
 library(emmeans)
-
-#library(emmeans)
-#library(performance)
-#ibrary(multcompView)
-#library(multcomp) 
+library(multcompView)
+library(multcomp) 
+library(lme4)
 
 # Loading, Cleaning and Manipulation of data -----
 setwd("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-Study/Sex_Pheromone_Study/Data")
@@ -78,7 +76,7 @@ model_performance(model.quasipoison) # using this to check for the quasipoison m
 
 
 # Using negative binomial model to check for season variation
-model.nb <- glm.nb(Count ~ season * Treatment, data = faw.season)
+model.nb <- glm.nb(Count ~ season + Treatment, data = faw.season)
 summary(model.nb)
 check_overdispersion(model.nb)
 check_homogeneity(model.nb)
@@ -89,25 +87,40 @@ model_performance(model.nb) # using this to check for the negative binomial mode
 # Checking AIC for the models for comparison 
 AIC(model.nb, model.poison)
 
+# Using negative binomial model with mixed effect to check for season variation
+# Fixed effect = season * Treatment, Random effect = Week
 
-# Since negative binomial works best for the data, i.e. no over dispersion detected
+model.glmer <- glmer.nb(Count ~ season * Treatment + (1|Week),
+                        data = faw.season)
+summary(model.glmer)
+check_overdispersion(model.glmer)
+check_homogeneity(model.glmer)
+check_zeroinflation(model.glmer)
+model_performance(model.glmer)
 
-emmeans.model.nb <- emmeans(model.nb, pairwise ~ season,
+
+# checking for the best model GLM or GLMM here 
+AIC(model.glmer, model.nb)
+
+# Since glmm negative binomial works best for the data, i.e. lower AIC
+emmeans.model.glmer <- emmeans(model.glmer, pairwise ~ Treatment,
         adjust = "Tukey",
         type = "response")
+emmeans.model.glmer
+ 
+# Compact Letter Display
+cld.model.glmer <- cld(emmeans.model.glmer$emmeans,
+                 Letters = letters,
+                 adjust = "tukey")
+cld.model.glmer
 
-# compute letters here 
-cld.2 <- cld(emmeans.2$emmeans,
-             Letters = letters,
-             adjust = "sidak")
-# View with grouping letters
-print(cld.2)
+emmeans.model.glmer.season <- emmeans(model.glmer, pairwise ~ season, 
+                                      adjust = "tukey",
+                                      type = "response")
 
-
-
-
-
-
-
-
+# Checking for which season where the trap count is higher for all the blends
+cld.model.glmer.season <- cld(emmeans.model.glmer.season$emmeans,
+                       Letters = letters,
+                       adjust = "tukey")
+cld.model.glmer.season
 
