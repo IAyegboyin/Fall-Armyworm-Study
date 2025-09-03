@@ -1,3 +1,0 @@
-Analysis of Fall Armyworm and Non-Target Insect Data
-
-This project analyzes weekly and daily counts of Spodoptera frugiperda (fall armyworm) and non-target insects under different treatment blends. Data were cleaned and reshaped using tidyverse, and descriptive statistics were computed to summarize treatment effects over time. Because the count data were zero-inflated and overdispersed, nonparametric Kruskal–Wallis tests (agricolae) and negative binomial regression models (MASS) were applied. Estimated marginal means and pairwise comparisons were generated with emmeans, and compact letter displays were created using multcompView. Model performance and overdispersion checks were conducted with performance to ensure robust statistical inference.
