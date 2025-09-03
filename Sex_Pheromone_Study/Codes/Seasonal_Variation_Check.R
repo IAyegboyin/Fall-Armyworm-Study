@@ -5,13 +5,15 @@
 # Libraries----
 library(tidyverse)
 library(readxl)
+library(performance) # to check performance of the models
+library(MASS)
+library(emmeans)
 
-
-#library(MASS)
 #library(emmeans)
 #library(performance)
 #ibrary(multcompView)
 #library(multcomp) 
+
 # Loading, Cleaning and Manipulation of data -----
 setwd("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-Study/Sex_Pheromone_Study/Data")
 
@@ -51,3 +53,61 @@ faw.season2 <-  read_excel("Fall_Armyworm_Data_season_2.xlsx",
                names_to = "Week", 
                values_to = "Count")
 # view(faw.season2)
+
+# Seasonality check starts here ----
+faw.season <- bind_rows(faw.season1, faw.season2)
+# view(faw.season)
+
+# Using poison model to check for seasonal variation 
+model.poison <- glm(Count ~ season * Treatment, data = faw.season, family = poisson)
+summary(model.poison)
+check_overdispersion(model.poison) #over dispersion check for poison model
+check_homogeneity(model.poison) # homogeniety check for poison model 
+check_zeroinflation(model.poison) 
+model_performance(model.poison) # using this to check for the posion model's AIC 
+
+#Using quasipoison model to check for seasonal variation
+
+model.quasipoison <- glm(Count ~ season * Treatment, data = faw.season, 
+                        family =  quasipoisson(link = "identity"))
+summary(model.quasipoison)
+check_overdispersion(model.quasipoison)
+check_homogeneity(model.quasipoison)
+check_zeroinflation(model.quasipoison)
+model_performance(model.quasipoison) # using this to check for the quasipoison model's AIC
+
+
+# Using negative binomial model to check for season variation
+model.nb <- glm.nb(Count ~ season * Treatment, data = faw.season)
+summary(model.nb)
+check_overdispersion(model.nb)
+check_homogeneity(model.nb)
+check_zeroinflation(model.nb)
+model_performance(model.nb) # using this to check for the negative binomial model AIC majorly
+
+
+# Checking AIC for the models for comparison 
+AIC(model.nb, model.poison)
+
+
+# Since negative binomial works best for the data, i.e. no over dispersion detected
+
+emmeans.model.nb <- emmeans(model.nb, pairwise ~ season,
+        adjust = "Tukey",
+        type = "response")
+
+# compute letters here 
+cld.2 <- cld(emmeans.2$emmeans,
+             Letters = letters,
+             adjust = "sidak")
+# View with grouping letters
+print(cld.2)
+
+
+
+
+
+
+
+
+
