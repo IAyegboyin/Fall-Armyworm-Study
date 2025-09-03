@@ -485,3 +485,37 @@ ggplot(plot_data, aes(x = Treatment, y = Mean, fill = Treatment)) +
       # Plot margins
       plot.margin = margin(15, 15, 15, 15)
     )
+  
+  df_total <- weekly_data %>%
+    group_by(Treatment, Count) %>%
+    summarise(total_catch = sum(Count), .groups = "drop")
+  
+  ggplot(df_total, aes(x = Treatment, y = total_catch, fill = Treatment)) +
+    geom_boxplot() +
+    labs(title = "Total FAW Catch per Treatment",
+         x = "Treatment", y = "Total Moths Caught") +
+    theme_minimal() +
+    theme(legend.position = "none")
+  
+  ggplot(weekly_data, aes(x = Week, y = Treatment, size = Count, fill = Count)) +
+    geom_point(shape = 21, color = "black", alpha = 0.8) +
+    scale_size(range = c(2, 15)) +
+    scale_fill_viridis_c(option = "C") +
+    labs(title = "Visual cue of weekly dynamics per treatment",
+         x = "Week", y = "Treatment", size = "Count") +
+    theme_minimal()
+  
+  ggplot(weekly_data, aes(x = Count, y = reorder(Treatment, Count), fill = Treatment)) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~ Week, ncol = 2) +
+    labs(title = "FAW Trap Counts by Treatment per Week",
+         x = "Moths Caught", y = "Treatment") +
+    theme_minimal()
+  
+  ggplot(weekly_data, aes(x = Week, y = Treatment, fill = Count)) +
+    geom_tile(color = "white") +
+   
+    scale_fill_viridis_c(option = "C") +
+    labs(title = "FAW Trap Counts with Labels",
+         x = "Week", y = "Treatment") +
+    theme_minimal()

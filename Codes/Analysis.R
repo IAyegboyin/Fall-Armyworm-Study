@@ -11,6 +11,7 @@ library(emmeans)
 library(performance)
 library(multcompView)
 library(multcomp)
+library(DHARMa)
 
 # gs4_auth() # You need this to authenticate the google sheet
 
@@ -206,6 +207,5 @@ cld.1 <- cld(emmeans.1$emmeans,
              adjust = "sidak")
 # View with grouping letters
 print(cld.1)
-
 
 
