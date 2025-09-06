@@ -243,7 +243,7 @@ ggplot(plot_data, aes(x = Treatment, y = Mean, fill = Treatment)) +
       plot.margin = margin(15, 15, 15, 15)
     )
   
-  # Plot 4 ----
+# Plot 4 ----
   # Data preparation and manipulation
   weekly_long_2 <- faw.weekly_clean_2 %>%
     pivot_longer(cols = starts_with("Week"), names_to = "Week", values_to = "Count")
@@ -356,7 +356,7 @@ ggplot(plot_data, aes(x = Treatment, y = Mean, fill = Treatment)) +
       # Plot margins
       plot.margin = margin(15, 15, 15, 15)
     ) 
-  # Plot 5 ----
+# Plot 5 ----
   # 1. Create the correct plot_data (with 5 treatments)
   plot_data <- data.frame(
     Treatment = factor(c("Blend1", "Blend2", "Blend3", "Female", "n-Hexane"), 
@@ -411,7 +411,7 @@ ggplot(plot_data, aes(x = Treatment, y = Mean, fill = Treatment)) +
     ) +
     
     scale_y_continuous(expand = expansion(mult = c(0, 0.15)))  # Slightly more headroom for letters
-  # Plot 6 ----
+# Plot 6 ----
   # Read and prepare data
   data_2 <- other.weekly_data_2
   # view(data_2)
@@ -519,3 +519,62 @@ ggplot(plot_data, aes(x = Treatment, y = Mean, fill = Treatment)) +
     labs(title = "FAW Trap Counts with Labels",
          x = "Week", y = "Treatment") +
     theme_minimal()
+  
+  
+  
+  
+# Seasonal Variation plots ----
+  seasonal_difference_plot <- faw.season %>%
+    mutate(Week = as.numeric(str_remove(Week, "Week "))) %>%
+    group_by(season) %>%
+    summarise(
+    Mean = mean(Count),
+    SEM = sd(Count)/sqrt(n()),
+    .groups = 'drop'
+  )
+
+ggplot() +
+  geom_errorbar(
+    data = seasonal_difference_plot,
+    aes(x = season, ymin = Mean - SEM, ymax = Mean + SEM),
+    position = position_dodge(0.8),
+    width = 0.2,
+    color = "black",
+    linewidth = 0.5
+  ) +
+  geom_col(
+    data = seasonal_difference_plot,
+    aes(x = season, y = Mean, fill = season),
+    position = position_dodge(0.8),
+    width = 0.3
+  ) +
+  labs(x = NULL, 
+       y = "Average Count of Male Fall Armyworm") +
+  scale_fill_manual(
+    name = "Season",
+    values = c("season 1" = "steelblue", "season 2" = "tomato"), # pick your colors
+    labels = c("Season 1", "Season 2")
+  ) +
+  theme_minimal() + 
+  theme(
+    # Axis lines
+    axis.line = element_line(color = "black", linewidth = 0.5),
+    axis.line.y = element_line(color = "black", linewidth = 0.5),
+    axis.line.x = element_line(color = "black", linewidth = 0.5),
+    
+    # Grid lines (horizontal only)
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y = element_line(color = "gray90", linewidth = 0.3),
+    panel.grid.minor.y = element_blank(),
+    
+    # Legend customization
+    legend.position = c(0.85, 0.85),
+    legend.background = element_rect(fill = "white", color = "black"),
+    legend.text = element_text(size = 12),
+    legend.key.height = unit(0.8, "cm"),
+    
+    # Plot margins
+    plot.margin = margin(15, 15, 15, 15)
+  ) 
+  

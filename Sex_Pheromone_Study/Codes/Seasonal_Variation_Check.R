@@ -124,3 +124,4 @@ cld.model.glmer.season <- cld(emmeans.model.glmer.season$emmeans,
                        adjust = "tukey")
 cld.model.glmer.season
 
+
