@@ -24,19 +24,28 @@ gc_ead <- gc_ead %>%
 # exploratory data analysis starts here ----
 
 # Summarize per group (average amplitude)
-summary_data <- gc_ead %>%
+gc_ead.summary_data <- gc_ead %>%
   group_by(population, component, wavename) %>%
   summarise(mean_amp = mean(amplitude_mV, na.rm = TRUE),
             n = n(),
             .groups = "drop")
+view(gc_ead.summary_data)
+write_csv(gc_ead.summary_data, 
+          "/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-Study/Sex_Pheromone_Study/Data/gc_ead.summary_data.csv")
 
 # Boxplot of amplitudes by country and component
 ggplot(gc_ead, aes(x = component, y = amplitude_mV, fill = population)) +
-  geom_boxplot() +
+  geom_boxplot(outliers = FALSE) +
   facet_wrap(~ wavename, scales = "free_y") +
-  theme_bw() +
+  theme_classic() +
   labs(# title = "GC-EAD responses per component by country",
-       y = "Amplitude (mV)")
+       y = "Amplitude (mV)",
+       x = "Components") +
+  scale_fill_manual(
+    name = "Country",
+    values = c("Benin" = "orange", "Kenya" = "steelblue", "Nigeria" = "green"), # pick your colors
+    labels = c("Benin", "Kenya", "Nigeria")
+  ) 
 
 plot <- gc_ead %>%
   group_by(population, component, wavename) %>%
@@ -61,7 +70,7 @@ ggplot(plot, aes(x = component, y = mean_amp, fill = population)) +
     x = "Component",
     y = "Mean amplitude (mV)",
     fill = "Country"
-  )
+  ) + theme_classic()
 
 ggplot(plot, aes(x = component, y = mean_amp, fill = wavename)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
@@ -74,10 +83,15 @@ ggplot(plot, aes(x = component, y = mean_amp, fill = wavename)) +
   theme_bw(base_size = 13) +
   labs(
     # title = "GC-EAD responses per component across different countries",
-    x = "Component",
+    x = "Components",
     y = "Mean amplitude (mV)",
     fill = "Insect type"
-  ) + theme_classic()
+  ) + theme_classic() +
+  scale_fill_manual(
+      name = "Blend Extracts",
+      values = c("FAW" = "#1b9e77", "MCB" = "#984ea3"),
+      labels = c("FAW", "MCB")
+  )
 
 
 ggplot(plot, aes(x = wavename, y = mean_amp, fill = component)) +
@@ -91,7 +105,7 @@ ggplot(plot, aes(x = wavename, y = mean_amp, fill = component)) +
   theme_bw(base_size = 13) +
   labs(
     # title = "GC-EAD responses per component across populations",
-    x = "Wavename",
+    x = "Blend Extracts",
     y = "Mean amplitude (mV)",
     fill = "Component"
   ) + theme_classic()
@@ -112,7 +126,12 @@ ggplot(plot, aes(x = population, y = mean_amp, fill = wavename)) +
     y = "Mean amplitude (mV)",
     fill = "Wavename"
   ) +  
-theme_classic()
+theme_classic() +
+  scale_fill_manual(
+    name = "Blend Extracts",
+    values = c("FAW" = "#4daf4a", "MCB" = "#e41a1c"),
+    labels = c("FAW", "MCB")
+  )
 
 
 # Mean blend profile for mcb
@@ -130,27 +149,3 @@ blend_comparison <- gc_ead %>%
 
 blend_comparison
 
-
-
-theme_minimal() +
-  theme(
-    # Axis lines
-    axis.line = element_line(color = "black", linewidth = 0.5),
-    axis.line.y = element_line(color = "black", linewidth = 0.5),
-    axis.line.x = element_line(color = "black", linewidth = 0.5),
-    
-    # Grid lines (horizontal only)
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    panel.grid.major.y = element_line(color = "gray90", linewidth = 0.3),
-    panel.grid.minor.y = element_blank(),
-    
-    # Legend customization
-    legend.position = c(0.75, 0.75),
-    legend.background = element_rect(fill = "white", color = "black"),
-    legend.text = element_text(size = 12),
-    legend.key.height = unit(0.8, "cm"),
-    
-    # Plot margins
-    plot.margin = margin(15, 15, 15, 15)
-  ) 
