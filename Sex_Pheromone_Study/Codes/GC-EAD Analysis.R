@@ -9,6 +9,7 @@ library(tidyverse)
 library(readxl)
 library(factoextra)
 library(FactoMineR)
+library(corrplot)
 # library(performance) # to check performance of the models
 # library(MASS)
 # library(emmeans)
@@ -156,12 +157,26 @@ blend_comparison
 
 
 # Principal Component Analysis ----
+# gc_ead
 
-gc_ead_pca <- gc_ead %>%
-  
+# Correlation of parameters
+cor_matrix <- cor(gc_ead[, c("insect_no", "onset_min", "amplitude_mV")], 
+                  method= "spearman")
+corrplot(cor_matrix, 
+         method = "color", 
+         addCoef.col = 'black', 
+         tl.cex = 0.7,      # Variable font size
+         tl.col = 'black',
+         number.cex = 0.5) # font size
+
+
+
+
+
 
 meta <- gc_ead_pca %>% select(population, wavename)
 gc_ead_pca <- gc_ead_pca %>% select(-population, -wavename)
+
 
 str(gc_ead_pca)
 
