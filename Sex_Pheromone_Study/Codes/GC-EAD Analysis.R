@@ -75,8 +75,8 @@ ggplot(plot_dat2, aes(x = component, y = mean_amp, fill = population)) +
     fill = "Country"
   )
 
-####################################################
-plot_dat <- gc_ead %>%
+
+plot <- gc_ead %>%
   group_by(population, component, wavename) %>%
   summarise(
     mean_amp = mean(amplitude_mV, na.rm = TRUE),
@@ -84,7 +84,8 @@ plot_dat <- gc_ead %>%
     .groups = "drop"
   )
 
-ggplot(plot_dat, aes(x = component, y = mean_amp, fill = wavename)) +
+
+ggplot(plot, aes(x = component, y = mean_amp, fill = wavename)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   geom_errorbar(
     aes(ymin = mean_amp - sem, ymax = mean_amp + sem),
@@ -101,7 +102,7 @@ ggplot(plot_dat, aes(x = component, y = mean_amp, fill = wavename)) +
   )
 
 
-ggplot(plot_dat, aes(x = wavename, y = mean_amp, fill = component)) +
+ggplot(plot, aes(x = wavename, y = mean_amp, fill = component)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   geom_errorbar(
     aes(ymin = mean_amp - sem, ymax = mean_amp + sem),
@@ -117,17 +118,8 @@ ggplot(plot_dat, aes(x = wavename, y = mean_amp, fill = component)) +
     fill = "Component"
   )
 
-# summarise means + SEM
-plot_dat4 <- gc_ead %>%
-  group_by(population, wavename, component) %>%
-  summarise(
-    mean_amp = mean(amplitude_mV, na.rm = TRUE),
-    sem = sd(amplitude_mV, na.rm = TRUE) / sqrt(n()),
-    .groups = "drop"
-  )
-
 # grouped bars per country, facetted by component
-ggplot(plot_dat4, aes(x = population, y = mean_amp, fill = wavename)) +
+ggplot(plot, aes(x = population, y = mean_amp, fill = wavename)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.5) +
   geom_errorbar(
     aes(ymin = mean_amp - sem, ymax = mean_amp + sem),
@@ -145,13 +137,11 @@ ggplot(plot_dat4, aes(x = population, y = mean_amp, fill = wavename)) +
 theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-
 # Mean blend profile for mcb
 mcb_profile <- gc_ead %>%
   filter(wavename == "mcb") %>%
   group_by(component, population) %>%
   summarise(mcb_mean = mean(amplitude_mV), .groups = "drop")
-
 # Join to other insects
 blend_comparison <- gc_ead %>%
   filter(wavename != "mcb") %>%
@@ -160,69 +150,19 @@ blend_comparison <- gc_ead %>%
   left_join(mcb_profile, by = c("component", "population")) %>%
   mutate(diff = insect_mean - mcb_mean)
 
-print(blend_comparison)
+blend_comparison
 
+
+
+
+# Principal Component Analysis ----
 
 gc_ead_pca <- gc_ead %>%
-  mutate(wavename = ifelse(wavename == "mcb", "mcb", "faw")) %>%
-  group_by(population, wavename, component) %>%
-  summarise(mean_amp = mean(amplitude_mV, na.rm = TRUE), .groups = "drop") %>%
-  pivot_wider(names_from = component, values_from = mean_amp, values_fill = 0)
+  
+
 meta <- gc_ead_pca %>% select(population, wavename)
 gc_ead_pca <- gc_ead_pca %>% select(-population, -wavename)
 
+str(gc_ead_pca)
 
-pca_res <- PCA(gc_ead_pca, graph = FALSE)
-ca_res <- CA(gc_ead_pca, graph = FALSE)
-
-eig.val_gc_ead <- get_eigenvalue(pca_res)
-eig.val_gc_ead
-
-fviz_eig(pca_res, addlabels = TRUE, ylim = c(0, 50)) # scree plot
-
-fviz_pca_var(pca_res, col.var = "black", repel = TRUE)
-
-fviz_pca_var(pca_res, col.var = "cos2",
-             repel = TRUE # Avoid text overlapping
-)
-
-fviz_pca_ind(pca_res, col.ind = "cos2", pointsize = "cos2",
-             pointshape = 21, fill = "#E7B800", 
-             repel = TRUE) # Avoid text overlapping (slow if many points)
-
-fviz_pca_var(pca_res, col.var = "contrib",
-             gradient.cols = c("red", "#E7B800", "darkgreen", "blue"),
-             repel = TRUE # Avoid text overlapping
-)
-
-fviz_contrib(pca_res, choice = "var", axes = 1)
-fviz_contrib(pca_res, choice = "var", axes = 2)
-
-
-
-
-
-
-
-
-
-
-
-
-fviz_pca_ind(pca_res,
-             geom.ind = "point",
-             habillage = meta$wavename,
-             addEllipses = TRUE,
-             palette = c("#00AFBB", "#E7B800"),
-             shape = meta$population,
-             repel = TRUE)
-
-fviz_pca_var(pca_res, repel = TRUE)
-
-
-fviz_ca_ind(ca_res,
-            habillage = gc_ea$wavename,
-            addEllipses = TRUE,
-            repel = TRUE)
-
-fviz_ca_var(ca_res, repel = TRUE)
+corrplot::corrplot(gc_ead_pca)
