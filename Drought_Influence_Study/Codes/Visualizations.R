@@ -26,7 +26,7 @@ ggplot(eggmass_total, aes(x = 1, y = no_drought)) +
 
 # .............
 # ..........................................................................
-df_long <- oviposition %>%
+ovi_long <- oviposition %>%
   dplyr::select(cage_id, treatment, eggmass_24h, eggmass_48h, total_eggmass,
                 other_eggs_24h, other_eggs_48h, total_other_eggs) %>%
   pivot_longer(
@@ -34,7 +34,7 @@ df_long <- oviposition %>%
     names_to = "variable", values_to = "count"
   )
 
-ggplot(df_long, aes(x = treatment, y = count, fill = treatment)) +
+ggplot(ovi_long, aes(x = treatment, y = count, fill = treatment)) +
   geom_boxplot(alpha = 0.6) +
   geom_jitter(width = 0.2, alpha = 0.7) +
   facet_wrap(~ variable, scales = "free_y") +
@@ -43,7 +43,7 @@ ggplot(df_long, aes(x = treatment, y = count, fill = treatment)) +
        y = "Egg count")
 
 
-df_summary <- df_long %>%
+ovi_summary <- ovi_long %>%
   group_by(treatment, variable) %>%
   summarise(
     mean = mean(count, na.rm = TRUE),
@@ -51,7 +51,7 @@ df_summary <- df_long %>%
     .groups = "drop"
   )
 
-ggplot(df_summary, aes(x = mean, y = variable, fill = treatment)) +
+ggplot(ovi_summary, aes(x = mean, y = variable, fill = treatment)) +
   geom_col(position = position_dodge(0.8), width = 0.7) +
   geom_errorbar(
     aes(xmin = mean - sem, xmax = mean + sem),
@@ -97,7 +97,7 @@ larva %>%
        x = "Average Leaf Damage (%)", y = "")
 
 
-df_long <- larva %>%
+larva_long <- larva %>%
   pivot_longer(cols = starts_with("leaf_damage"),
                names_to = "timepoint",
                values_to = "damage") %>%
@@ -107,7 +107,7 @@ df_long <- larva %>%
                             leaf_damage_3 = "120h"),
          timepoint = factor(timepoint, levels = c("24h", "48h", "120h")))
 
-ggplot(df_long, aes(x = timepoint, y = damage, color = treatment, group = treatment)) +
+ggplot(larva_long, aes(x = timepoint, y = damage, color = treatment, group = treatment)) +
   stat_summary(fun = mean, geom = "line", size = 0.8) +
   stat_summary(fun = mean, geom = "point", size = 2) +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
