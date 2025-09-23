@@ -42,7 +42,7 @@ ggplot(ovi_long, aes(x = treatment, y = count, fill = treatment)) +
   labs(title = "Egg-laying patterns across drought treatments",
        y = "Egg count")
 
-
+view (ovi_long)
 ovi_summary <- ovi_long %>%
   group_by(treatment, variable) %>%
   summarise(
@@ -147,3 +147,23 @@ ggplot(sex_summary, aes(x = treatment, y = count, fill = adult_emergence)) +
   theme_minimal() +
   labs(title = "Adult Emergence (Counts) by Treatment",
        x = "Treatment", y = "Number of Adults", fill = "Sex")
+
+x <- larva %>%
+  dplyr::select(treatment, larval_weight_gain)%>%
+  group_by(treatment) %>%
+  summarise(
+    mean_lw = mean(larval_weight_gain, na.rm = TRUE),
+    sem_lw = sd(larval_weight_gain, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+ggplot(x, aes(x = treatment, y = mean_lw, fill = treatment)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_errorbar(aes(ymin = mean_lw - sem_lw, ymax = mean_lw + sem_lw), 
+                width = 0.2, color = "black", size = 0.7) +
+  labs(title = "Average Larval Weight Gain by Treatment",
+       x = "Treatment",
+       y = "Mean Larval Weight Gain (g)") +
+  scale_fill_manual(values = c("drought" = "lightcoral", "no drought" = "lightblue")) +
+  theme_classic() +
+  theme(legend.position = "none")
