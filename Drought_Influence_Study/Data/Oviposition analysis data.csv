@@ -17,8 +17,7 @@ cage_id,treatment,eggmass_24h,eggmass_48h,other_eggs_24h,other_eggs_48h,total_eg
 8,drought,0,4,2,2,4,4,NA
 9,no_drought,0,0,0,0,0,0,NA
 9,drought,0,0,0,0,0,0,NA
-10,no_drought,1,2,2,3,3,5,NA
-10,no_drought,2,2,2,3,4,5,NA
+10,no_drought,3,4,4,6,7,10,NA
 10,drought,3,5,4,6,8,14,NA
 11,no_drought,0,0,0,0,0,0,NA
 11,drought,0,0,0,0,0,0,NA

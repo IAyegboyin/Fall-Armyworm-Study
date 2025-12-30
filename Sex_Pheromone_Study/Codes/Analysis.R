@@ -16,11 +16,13 @@ library(DHARMa)
 # gs4_auth() # You need this to authenticate the google sheet
 
 # faw - load data----
-faw.daily <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data.xlsx",
+setwd("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-Study/Sex_Pheromone_Study/Data")
+
+faw.daily <- read_excel("Fall_Armyworm_Data.xlsx",
                         sheet = "merged_data" )
 # view(faw.daily)
 
-faw.weekly <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data.xlsx",
+faw.weekly <- read_excel("Fall_Armyworm_Data.xlsx",
                          sheet = "weekly_data" ) 
 # view(faw.weekly)
 
@@ -65,7 +67,7 @@ faw.summary.stats <- weekly_data %>%
             .groups = 'drop')
 as.data.frame(faw.summary.stats)
 # view(faw.summary.stats)
-write.csv(x = faw.summary.stats, file = "/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_summary_stats.csv")
+write.csv(x = faw.summary.stats, file = "Fall_Armyworm_summary_stats.csv")
 
 # faw kruskal - wallis test starts here ---- 
 faw.kruskal <- faw.weekly_clean %>%
@@ -101,11 +103,11 @@ weekly.kruskal.results <- faw.kruskal %>%
 
 # NON-TARGET INSECTS ANALYSIS STARTS HERE ----
 # nt - load data----
-other.daily <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data.xlsx",
+other.daily <- read_excel("Fall_Armyworm_Data.xlsx",
                           sheet = "other_insects")
 # view(other.daily)
 
-other.weekly <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data.xlsx",
+other.weekly <- read_excel("Fall_Armyworm_Data.xlsx",
                            sheet = "other_insects_weekly") 
 # view(other.weekly)
 
@@ -151,7 +153,7 @@ other.summary.stats <- other.weekly_data %>%
             .groups = 'drop')
 as.data.frame(other.summary.stats)
 # view(other.summary.stats)
-write.csv(x = faw.summary.stats, file = "/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Other_Insects_summary_stats.csv")
+write.csv(x = faw.summary.stats, file = "Other_Insects_summary_stats.csv")
 
 # nt - kruskal-wallis test ----
 other.kruskal <- other.weekly_clean %>%

@@ -112,9 +112,6 @@ cld.oviposition <- cld(emmeans.oviposition.model,
 # View with grouping letters
 print(cld.oviposition)
 
-# .............
-# Larva ...........
-# ..........................................................................
 
 
 

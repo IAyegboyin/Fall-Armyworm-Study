@@ -15,11 +15,13 @@ library(multcomp)
 # gs4_auth() # You need this to authenticate the google sheet
 
 # faw - load data----
-faw.daily_2 <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data_season_2.xlsx",
+setwd("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-Study/Sex_Pheromone_Study/Data")
+# view(faw.weekly)
+faw.daily_2 <- read_excel("Fall_Armyworm_Data_season_2.xlsx",
                         sheet = "faw_season_2")
 view(faw.daily_2)
 
-faw.weekly_2 <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data_season_2.xlsx",
+faw.weekly_2 <- read_excel("Fall_Armyworm_Data_season_2.xlsx",
                          sheet = "faw_weekly_data_2") 
 # view(faw.weekly_2)
 
@@ -64,7 +66,7 @@ faw.summary.stats_2 <- weekly_data_2 %>%
             .groups = 'drop')
 as.data.frame(faw.summary.stats_2)
 # view(faw.summary.stats_2)
-write.csv(x = faw.summary.stats_2, file = "/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_summary_stats_2.csv")
+write.csv(x = faw.summary.stats_2, file = "Fall_Armyworm_summary_stats_2.csv")
 
 # faw kruskal - wallis test starts here ---- 
 faw.kruskal_2 <- faw.weekly_clean_2 %>%
@@ -116,11 +118,11 @@ get.kruskal.results <- function(week_data) {
 
 # NON-TARGET INSECTS ANALYSIS STARTS HERE ----
 # nt - load data----
-other.daily_2 <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data_season_2.xlsx",
+other.daily_2 <- read_excel("Fall_Armyworm_Data_season_2.xlsx",
                           sheet = "other insect_season2")
 # view(other.daily_2)
 
-other.weekly_2 <- read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data_season_2.xlsx",
+other.weekly_2 <- read_excel("Fall_Armyworm_Data_season_2.xlsx",
                            sheet = "weekly_other_insect_season2") 
 # view(other.weekly_2)
 
@@ -165,7 +167,7 @@ other.summary.stats_2 <- other.weekly_data_2 %>%
             .groups = 'drop')
 as.data.frame(other.summary.stats_2)
 # view(other.summary.stats_2)
-write.csv(x = other.summary.stats_2, file = "/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Other_Insects_summary_stats_2.csv")
+write.csv(x = other.summary.stats_2, file = "Other_Insects_summary_stats_2.csv")
 
 # nt - kruskal-wallis test ----
 other.kruskal_2 <- other.weekly_clean_2 %>%
@@ -190,7 +192,7 @@ view(non.target.weekly.kruskal.results_2)
 # Negative Binomial Modelling ----
 # negative binomial model 2
 
-faw.model_2 <-  read_excel("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-control/Data/Fall_Armyworm_Data_season_2.xlsx",
+faw.model_2 <-  read_excel("Fall_Armyworm_Data_season_2.xlsx",
                            sheet = "season_2")%>%
   mutate (
     Treatment = case_when(
