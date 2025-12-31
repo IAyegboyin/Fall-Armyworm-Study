@@ -48,6 +48,11 @@ variety_map <- c(
   "V10" = "Oba Super 15","V11" = "Sammaz 51"
 )
 
+opv_varieties <- c(
+  "Sammaz 15", "Sammaz 52", "Sammaz 60",
+  "Sammaz 66", "Sammaz 59", "Sammaz 51"
+)
+
 # User-specified order by V-code (this is the order you requested)
 ordered_codes <- c("V1","V11","V3","V8","V4","V7","V2","V9","V10","V6","V5")
 
@@ -137,7 +142,8 @@ weekly_ent_clean_data <- Weekly_Monitoring %>%
   ) %>%
   mutate(
     Variety = recode(as.character(Variety), !!!variety_map),
-    Variety = factor(Variety, levels = ordered_names)
+    Variety = factor(Variety, levels = ordered_names),
+    Variety_Type = if_else(Variety %in% opv_varieties, "OPV", "HV")
   )
 
 long_weekly_ent_clean_data <- weekly_ent_clean_data %>%
@@ -157,6 +163,9 @@ long_weekly_ent_clean_data <- weekly_ent_clean_data %>%
       TRUE ~ NA_character_
     )
   )
+
+# view(long_weekly_ent_clean_data)
+
 severity_to_pct <- c(
   "0" = 0,
   "1" = 10,
@@ -183,9 +192,8 @@ period_ent_data <- long_weekly_ent_clean_data %>%
   dplyr::select(
     Plant_ID, Variety, Plot,
     Parameter, Period, WAS,
-    Value_pct
+    Value_pct, Variety_Type
   )
-
 
 period_collapsed <- period_ent_data %>%
   group_by(Plant_ID, Variety, Plot, Parameter, Period) %>%
@@ -531,3 +539,55 @@ ggplot(as.data.frame(larva_cld),
     axis.text.x = element_text(angle = 90, hjust = 1),
     plot.title  = element_text( face= "bold", size = 15)
   )
+
+
+# Objective 2 starts here ----
+damage_type_summary <- period_ent_data %>%
+  filter(Parameter == "Damage") %>%
+  group_by(Variety_Type, Period) %>%
+  summarise(
+    mean_damage = mean(Value_pct, na.rm = TRUE),
+    se_damage   = sd(Value_pct, na.rm = TRUE) / sqrt(sum(!is.na(Value_pct))),
+    .groups = "drop"
+  )
+
+
+ggplot(damage_type_summary,
+       aes(x = Variety_Type, y = mean_damage, fill = Period)) +
+  geom_col(position = position_dodge(0.7), width = 0.6) +
+  geom_errorbar(
+    aes(ymin = mean_damage - se_damage,
+        ymax = mean_damage + se_damage),
+    width = 0.2,
+    position = position_dodge(0.7)
+  ) +
+  scale_fill_manual(values = period_cols) +
+  labs(
+    title = "FAW Damage (%) — OPV vs Hybrid Varieties",
+    x = "Variety Type",
+    y = "Mean Damage (%)"
+  ) +
+  theme_classic(base_size = 13) +
+  theme(plot.title = element_text(face = "bold"))
+
+
+
+damage_mod_type <- lmer(
+  Value_pct ~ Variety_Type * Period + (1 | Plot),
+  data = damage_dat
+)
+
+anova(damage_mod_type)
+
+emm_type <- emmeans(damage_mod_type, ~ Variety_Type | Period)
+cld(emm_type, Letters = letters, adjust = "tukey")
+
+
+larva_mod_type <- lmer(
+  Value_pct ~ Variety_Type * Period + (1 | Plot),
+  data = larvae_dat
+)
+anova(larva_mod_type)
+emm_type <- emmeans(larva_mod_type, ~ Variety_Type | Period)
+cld(emm_type, Letters = letters, adjust = "tukey")
+
