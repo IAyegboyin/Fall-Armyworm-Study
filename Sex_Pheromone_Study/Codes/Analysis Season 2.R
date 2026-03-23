@@ -16,10 +16,10 @@ library(multcomp)
 
 # faw - load data----
 setwd("/Users/Esmael/Desktop/Data Science Library/Data for play/Fall-Armyworm-Study/Sex_Pheromone_Study/Data")
-# view(faw.weekly)
+
 faw.daily_2 <- read_excel("Fall_Armyworm_Data_season_2.xlsx",
                         sheet = "faw_season_2")
-view(faw.daily_2)
+# view(faw.daily_2)
 
 faw.weekly_2 <- read_excel("Fall_Armyworm_Data_season_2.xlsx",
                          sheet = "faw_weekly_data_2") 
@@ -38,7 +38,7 @@ faw.daily_clean_2 <- faw.daily_2 %>%
       TRUE ~ Treatment  # keeps original value if no match
     )
 )
-view(faw.daily_clean_2)
+# view(faw.daily_clean_2)
 
 faw.weekly_clean_2 <- faw.weekly_2 %>%
   mutate (
@@ -51,7 +51,7 @@ faw.weekly_clean_2 <- faw.weekly_2 %>%
       TRUE ~ Treatment  # keeps original value if no match
       )
     )
-view(faw.weekly_clean_2)
+# view(faw.weekly_clean_2)
 
 # faw - descriptive statistics starts here ----
 weekly_data_2 <- faw.weekly_clean_2 %>%
@@ -185,7 +185,7 @@ non.target.weekly.kruskal.results_2 <- other.kruskal_2 %>%
   group_by(Week) %>%
   group_modify(~ get.kruskal.results(.x))
 
-view(non.target.weekly.kruskal.results_2)
+# view(non.target.weekly.kruskal.results_2)
 
 
 
