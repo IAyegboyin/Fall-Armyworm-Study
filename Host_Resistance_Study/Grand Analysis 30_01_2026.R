@@ -1052,8 +1052,6 @@ plot_faw_larvae_variety_type_full <- function(data,
                                               parameter_name = "Larvae",
                                               variety_type_cols = c("Open Pollinated" = "#d95f02",
                                                                     "Hybrid" = "#1b9e77")) {
-  
-  
   larvae_data <- data %>%
     filter(Parameter == parameter_name) %>%
     mutate(
@@ -1066,9 +1064,7 @@ plot_faw_larvae_variety_type_full <- function(data,
     ) %>%
     filter(!is.na(Value))
   
-  #--------------------------------------------------
-  # 2️⃣ Poisson GLM for Variety Type
-  #--------------------------------------------------
+
   glm_model <- glm(
     Value ~ Variety_Type,
     family = poisson(link = "log"),
@@ -1084,9 +1080,7 @@ plot_faw_larvae_variety_type_full <- function(data,
   dispersion_value <- deviance(glm_model) / df.residual(glm_model)
   cat("\nOverdispersion ratio:", dispersion_value, "\n")
   
-  #--------------------------------------------------
-  # 3️⃣ Violin Plot (Distribution)
-  #--------------------------------------------------
+
   violin_plot <- ggplot(larvae_data,
                         aes(x = Variety_Type, y = Value, fill = Variety_Type)) +
     geom_violin(trim = FALSE, alpha = 0.7) +
@@ -1103,9 +1097,6 @@ plot_faw_larvae_variety_type_full <- function(data,
   
   print(violin_plot)
   
-  #--------------------------------------------------
-  # 4️⃣ Total Larvae per Variety Type
-  #--------------------------------------------------
   total_type <- larvae_data %>%
     group_by(Variety_Type) %>%
     summarise(total_all = sum(Value, na.rm = TRUE),
@@ -1129,9 +1120,6 @@ plot_faw_larvae_variety_type_full <- function(data,
           legend.position = "none")
   print(total_plot)
   
-  #--------------------------------------------------
-  # 5️⃣ Mean ± SEM per Variety Type
-  #--------------------------------------------------
   summary_type <- larvae_data %>%
     group_by(Variety_Type) %>%
     summarise(
@@ -1160,9 +1148,6 @@ plot_faw_larvae_variety_type_full <- function(data,
           legend.position = "none")
   print(sem_plot)
   
-  #--------------------------------------------------
-  # Return model + plots
-  #--------------------------------------------------
   return(list(
     model = glm_model,
     dispersion = dispersion_value,
@@ -1219,7 +1204,7 @@ run_glmm_variety_type <- function(data,
   ) +
     geom_col(width = 0.2) +
     geom_errorbar(
-      ggplot2::aes(ymin = mean - sem, ymax = mean + sem),
+      aes(ymin = mean - sem, ymax = mean + sem),
       width = 0.08
     ) +
     geom_text(aes(y = mean + sem, label = .group),
