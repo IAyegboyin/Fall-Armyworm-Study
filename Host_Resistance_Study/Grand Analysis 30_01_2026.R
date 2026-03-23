@@ -1269,50 +1269,42 @@ run_glmm_variety_type <- function(data,
     adjust = "sidak"
   )
   cld_df <- as.data.frame(cld_res)
-  
-  # 4. Raw mean + SEM for plotting
+  # Raw mean + SEM for plotting
   raw_sum <- dat %>%
-    dplyr::group_by(Variety_Type, Period) %>%
-    dplyr::summarise(
+    group_by(Variety_Type, Period) %>%
+    summarise(
       mean = mean(Value_pct, na.rm = TRUE),
       sd   = sd(Value_pct, na.rm = TRUE),
-      n    = dplyr::n(),
+      n    = n(),
       sem  = sd / sqrt(n),
       .groups = "drop"
     )
-  
-  # 5. Merge CLD letters with raw statistics
+  # Merging the computed letters with raw statistics
   plot_df <- raw_sum %>%
-    dplyr::left_join(
+    left_join(
       cld_df %>%
         dplyr::select(Variety_Type, Period, .group),
       by = c("Variety_Type", "Period")
     )
-  
-  # 6. Create faceted plot
-  plt <- ggplot2::ggplot(
+  # Create faceted plot
+  plt <- ggplot(
     plot_df,
-    ggplot2::aes(x = Variety_Type, y = mean, fill = Variety_Type)
+    aes(x = Variety_Type, y = mean, fill = Variety_Type)
   ) +
-    
-    ggplot2::geom_col(width = 0.2) +
-    
-    ggplot2::geom_errorbar(
+    geom_col(width = 0.2) +
+    geom_errorbar(
       ggplot2::aes(ymin = mean - sem, ymax = mean + sem),
       width = 0.08
     ) +
-    
-    ggplot2::geom_text(
-      ggplot2::aes(y = mean + sem, label = .group),
+    geom_text(aes(y = mean + sem, label = .group),
       vjust = -0.4,
       size = 6,
       color = "black"
     ) +
-    
-    ggplot2::facet_wrap(
+    facet_wrap(
       ~ Period,
       nrow = 1,
-      labeller = ggplot2::labeller(
+      labeller = labeller(
         Period = c(
           "8-21 DAS"  = "8–21 DAS",
           "22-35 DAS" = "22–35 DAS",
@@ -1321,14 +1313,11 @@ run_glmm_variety_type <- function(data,
         )
       )
     ) +
-    
-    ggplot2::coord_cartesian(ylim = c(0, ylim_max)) +
-    
-    ggplot2::scale_y_continuous(
+    coord_cartesian(ylim = c(0, ylim_max)) +
+    scale_y_continuous(
       expand = ggplot2::expansion(mult = c(0, 0.05))
     ) +
-    
-    ggplot2::scale_fill_manual(
+    scale_fill_manual(
       name = "Maize Variety Type",
       values = variety_type_cols,
       labels = c(
@@ -1336,32 +1325,27 @@ run_glmm_variety_type <- function(data,
         "OPV" = "Open Pollinated"
       )
     ) +
-    
-    ggplot2::scale_x_discrete(
+    scale_x_discrete(
       labels = c(
         "HV"  = "Hybrid",
         "OPV" = "Open Pollinated"
       )
     ) +
-    
-    ggplot2::labs(
+    labs(
       title = title_prefix,
       x = "Maize Variety Type",
       y = ylab
     ) +
-    
-    ggplot2::theme_classic(
+    theme_classic(
       base_size = 13,
       base_family = "Times New Roman"
     ) +
-    
-    ggplot2::theme(
+    theme(
       legend.position = "none",
       axis.text.x = ggplot2::element_text(angle = 90, hjust = 1),
       plot.title  = ggplot2::element_text(face = "bold", size = 15),
       strip.text  = ggplot2::element_text(face = "bold")
     )
-  
   return(list(
     model = mod,
     emm   = emm,
@@ -1377,7 +1361,6 @@ vt_damage <- run_glmm_variety_type(
   ylab = "Damage (%)",
   ylim_max = 90
 )
-
 vt_larvae <- run_glmm_variety_type(
   period_ent_data,
   title_prefix = "Average Larval Count on Maize Varieties",
