@@ -357,79 +357,7 @@ plot_by_period(
 )
 
 
-plot_damage_larvae_trend <- function(data,
-                                     scale_factor = 100,
-                                     variety_colors = NULL,
-                                     title_prefix = "Trend of FAW Damage and Larval Counts") {
-  
-  trend_summary <- data %>%
-    dplyr::filter(Parameter %in% c("Damage", "Larvae")) %>%
-    mutate(
-      Period = factor(
-        Period,
-        levels = c("8-21 DAS","22-35 DAS","36-49 DAS","50-63 DAS"),
-        labels = c("8-21","22-35","36-49","50-63")
-      ),
-      Value = as.numeric(Value_pct)
-    ) %>%
-    group_by(Variety, Period, Parameter) %>%
-    summarise(
-      mean_value = mean(Value, na.rm = TRUE),
-      se_value   = sd(Value, na.rm = TRUE) / sqrt(sum(!is.na(Value))),
-      .groups = "drop"
-    ) %>%
-    mutate(
-      plot_value = ifelse(Parameter == "Larvae",
-                          mean_value * scale_factor,
-                          mean_value)
-    )
-  
-  ggplot(trend_summary,
-         aes(x = Period,
-             y = plot_value,
-             color = Parameter,
-             group = Parameter)) +
-    
-    geom_line(size = 1) +
-    geom_point(size = 2.5) +
-    
-    facet_wrap(~Variety) +
-    
-    scale_y_continuous(
-      name = "Mean Damage (%)",
-      limits = c(0,100),
-      expand = c(0,0),
-      sec.axis = sec_axis(~./scale_factor,
-                          name = "Mean Larval Count")
-    ) +
-    scale_color_manual(
-      values = c(
-        "Damage" = "#D55E00",
-        "Larvae" = "#0072B2"
-      )
-    ) +
-    labs(
-      x = "Days After Sowing (DAS)",
-      color = "Parameter",
-      title = title_prefix
-    ) +
-    theme_classic(base_size = 13, base_family = "Times New Roman") +
-    theme(
-      strip.text = element_text(face = "bold"),
-      plot.title = element_text(face = "bold", size = 15),
-      legend.position = "top"
-    )
-}
-
-plot_damage_larvae_trend(
-  data = opv_ent_data,
-  title_prefix = "Trend of FAW Damage and Larvae in OPV Varieties"
-)
-plot_damage_larvae_trend(
-  data = hv_ent_data,
-  title_prefix = "Trend of FAW Damage and Larvae in Hybrid Varieties"
-)
-
+# Cummulative data plots here capped at 100 % for damage and counts for FAW larvae
 plot_cumulative_damage_cum_larvae <- function(data,
                                               title_prefix = "Cumulative FAW Damage and Larval Counts") {
   
@@ -516,7 +444,6 @@ plot_cumulative_damage_cum_larvae(
 )
 
 
-
 # damage incidence of damage in variety type 
 plot_faw_incidence <- function(summary_data,
                                      parameter_name = "Damage",
@@ -571,7 +498,6 @@ plot_faw_incidence <- function(summary_data,
 
 plot_faw_incidence(hv_ent_data)
 plot_faw_incidence(opv_ent_data)
-
 
 
 # Correlation: Damage vs Larvae
@@ -1382,4 +1308,5 @@ egg_data <- period_ent_data %>%
   )
   egg_data$Value_pct <- as.numeric(egg_data$Value_pct)
 # view(egg_data)
+  
 # Objective 3: to examine the relationship between plant physiological traits and FAW resistance ----
