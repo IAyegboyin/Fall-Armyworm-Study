@@ -53,31 +53,33 @@ hv_varieties <- c(
 ordered_codes <- c("V1","V11","V3","V8","V4","V7","V2","V9","V10","V6","V5")
 # Human-readable ordered levels (used for factor levels everywhere)
 ordered_names <- unname(variety_map[ordered_codes])
-# Week colours (explicit mapping)
+
+# Colour codes for uniform colours ---
 period_cols <- c(
-  "8-21 DAS" = "#1b9e77",   # green
-  "22-35 DAS" = "#d95f02",   # orange
-  "36-49 DAS" = "#7570b3",    # purple
+  "8-21 DAS" = "#1b9e77", 
+  "22-35 DAS" = "#d95f02",
+  "36-49 DAS" = "#7570b3",  
   "50-63 DAS" = "#e7298a"
 )
 variety_type_cols <- c(
-  "HV" = "#66a61e",   # green
-  "OPV" = "#d95f02"  # orange
+  "HV" = "#66a61e",
+  "OPV" = "#d95f02"  
 )
 week_cols <- c(
-  "2 WAS" = "#1b9e77",  # green
-  "3 WAS" = "#d95f02",  # orange
-  "4 WAS" = "#7570b3",  # purple
-  "5 WAS" = "#e7298a",   # pink
+  "2 WAS" = "#1b9e77",
+  "3 WAS" = "#d95f02",  
+  "4 WAS" = "#7570b3",  
+  "5 WAS" = "#e7298a",  
   "6 WAS" = "#e6ab02",
   "7 WAS" = "#66a61e",
   "8 WAS" = "#1f78b4"
 )
-# Explicit variety colours (keys match variety names)
+# variety colours (keys match variety names)
 variety_cols <- set_names(
   c("#d95f02","#1f78b4","#b2df8a","#1b9e77","#fb9a99","#7570b3","#666666","#e7298a","#a6761d","#e6ab02","#66a61e"),
   ordered_names
 )
+
 # Loading, cleaning and preparing data from Google Sheet ----
 Weekly_Monitoring <- read_sheet(
   "https://docs.google.com/spreadsheets/d/14KYjkx49VFTbC8AI7G0ev2uZNpbIKD3OwCbWAQxlWco/edit?gid=0#gid=0",
@@ -85,7 +87,7 @@ Weekly_Monitoring <- read_sheet(
 )
 # glimpse(Weekly_Monitoring) - just to check the data 
 
-# cleaning weekly data
+# built a function to clean  weekly data
 clean_weekly_ent_data <- function(data,
                                   variety_map,
                                   ordered_names,
@@ -195,8 +197,9 @@ long_weekly_ent_clean_data <- weekly_ent_clean_data %>%
     )
   )
 
-# view(long_weekly_ent_clean_data)
+# view(long_weekly_ent_clean_data) just glimpsing again 
 
+# changing my damage scores on the field to percentage from the field
 severity_to_pct <- c(
   "0" = 0,
   "1" = 10,
@@ -239,15 +242,16 @@ opv_ent_data <- period_ent_data %>%
   filter(Variety_Type == "OPV") # open pollinated varieties
 hv_ent_data <- period_ent_data %>%
   filter(Variety_Type == "HV") # hybrid varieties
+
 # Objective 1: to evaluate the field resistance of eleven maize varieties to Spodoptera frugiperda ----
 summarise_by_period <- function(data,
                                 parameter_name,
                                 value_col = "Value_pct") {
   
   data %>%
-    dplyr::filter(Parameter == parameter_name) %>%
-    dplyr::group_by(Variety, Variety_Type, Period) %>%  # Keep period here, I will need it later 
-    dplyr::summarise(
+    filter(Parameter == parameter_name) %>%
+    group_by(Variety, Variety_Type, Period) %>%  # Keep period here, I will need it later 
+    summarise(
       mean = mean(.data[[value_col]], na.rm = TRUE),
       se   = sd(.data[[value_col]], na.rm = TRUE) /
         sqrt(sum(!is.na(.data[[value_col]]))),
@@ -255,13 +259,13 @@ summarise_by_period <- function(data,
     )
 }
 
-# summaries (mean and se) of varities by types (opv et hv)
+# summaries (mean and SE) of varieties by types (OPV et HV)
 opv_dmg_summary  <- summarise_by_period(opv_ent_data, "Damage")
 opv_lar_summary  <- summarise_by_period(opv_ent_data, "Larvae")
 hv_dmg_summary  <- summarise_by_period(hv_ent_data, "Damage")
 hv_lar_summary  <- summarise_by_period(hv_ent_data, "Larvae")
 
-# plot damage (%) of different variety types by period
+# plotting damage (%) of different variety types by period
 get_variety_type_label <- function(data) {
   types <- unique(na.omit(data$Variety_Type))
   if (length(types) == 1) {
@@ -325,14 +329,14 @@ plot_by_period <- function(summary_data,
       strip.text  = element_text(face = "bold")
     )
 }
-# bar chart plot for summaries
+
+# plots for summaries
 plot_by_period(
   summary_data = opv_dmg_summary,
   y_label      = "Mean Damage (%)",
   base_title   = "Fall Armyworm Damage",
   ylim_max     = 90
 )
-
 plot_by_period(
   summary_data = hv_dmg_summary,
   y_label      = "Mean Damage (%)",
@@ -345,13 +349,13 @@ plot_by_period(
   base_title   = "Average Fall Armyworm Count",
   ylim_max     = 1.2
 )
-
 plot_by_period(
   summary_data = hv_lar_summary,
   y_label      = "Mean Fall Armyworm",
   base_title   = "Average Fall Armyworm Count",
   ylim_max     = 1.2
 )
+
 
 plot_damage_larvae_trend <- function(data,
                                      scale_factor = 100,
@@ -431,8 +435,7 @@ plot_cumulative_damage_cum_larvae <- function(data,
   
   # 🔹 Clean + correct summarisation
   trend_summary <- data %>%
-    dplyr::filter(Parameter %in% c("Damage", "Larvae")) %>%
-    
+    filter(Parameter %in% c("Damage", "Larvae")) %>%
     mutate(
       Period = factor(
         Period,
@@ -441,7 +444,6 @@ plot_cumulative_damage_cum_larvae <- function(data,
       ),
       Value = as.numeric(Value_pct)
     ) %>%
-    
     group_by(Variety, Period, Parameter) %>%
     summarise(
       value = if (first(Parameter) == "Larvae") {
@@ -451,33 +453,26 @@ plot_cumulative_damage_cum_larvae <- function(data,
       },
       .groups = "drop"
     ) %>%
-    
     arrange(Variety, Parameter, Period) %>%
-    
-    # 🔹 CUMULATIVE
     group_by(Variety, Parameter) %>%
     mutate(
       cum_value = cumsum(value),
       cum_value = ifelse(Parameter == "Damage",
-                         pmin(cum_value, 100),  # cap damage
+                         pmin(cum_value, 100),  # capping the damage here ...
                          cum_value)
     ) %>%
     ungroup()
-  
-  
-  # 🔹 Auto scale larvae
-  max_larvae <- max(trend_summary$cum_value[trend_summary$Parameter == "Larvae"], na.rm = TRUE)
+  # 🔹 Auto scale larva count 
+  max_larvae <- max(trend_summary$cum_value[trend_summary$Parameter == "Larvae"], 
+                    na.rm = TRUE)
   scale_factor <- 100 / max_larvae
-  
   trend_summary <- trend_summary %>%
     mutate(
       plot_value = ifelse(Parameter == "Larvae",
                           cum_value * scale_factor,
                           cum_value)
     )
-  
-  
-  # 🔹 Plot (NOW CLEAN — 1 POINT PER PERIOD)
+  # plot here 
   ggplot(trend_summary,
          aes(x = Period,
              y = plot_value,
@@ -486,29 +481,24 @@ plot_cumulative_damage_cum_larvae <- function(data,
     
     geom_line(linewidth = 1.2) +
     geom_point(size = 3) +
-    
     facet_wrap(~Variety) +
-    
     scale_y_continuous(
       name = "Cumulative Damage (%)",
       expand = c(0,0),
       sec.axis = sec_axis(~./scale_factor,
                           name = "Cumulative Larval Count")
     ) +
-    
     scale_color_manual(
       values = c(
         "Damage" = "#D55E00",
         "Larvae" = "#0072B2"
       )
     ) +
-    
     labs(
       x = "Days After Sowing (DAS)",
       color = "Parameter",
       title = title_prefix
     ) +
-    
     theme_classic(base_size = 13, base_family = "Times New Roman") +
     theme(
       strip.text = element_text(face = "bold"),
@@ -516,19 +506,18 @@ plot_cumulative_damage_cum_larvae <- function(data,
       legend.position = "top"
     )
 }
-
 plot_cumulative_damage_cum_larvae(
   data = opv_ent_data,
   title_prefix = "Cumulative FAW Damage and Larvae in OPV Varieties"
 )
-
 plot_cumulative_damage_cum_larvae(
   data = hv_ent_data,
   title_prefix = "Cumulative FAW Damage and Larvae in Hybrid Varieties"
 )
 
 
-# incidence of faw larva in variety type
+
+# damage incidence of damage in variety type 
 plot_faw_incidence <- function(summary_data,
                                      parameter_name = "Damage",
                                      title_suffix = "(1–63 DAS)") {
@@ -583,6 +572,8 @@ plot_faw_incidence <- function(summary_data,
 plot_faw_incidence(hv_ent_data)
 plot_faw_incidence(opv_ent_data)
 
+
+
 # Correlation: Damage vs Larvae
 plot_dmg_lar_correlation <- function(data,
                                      param_x = "Damage",
@@ -594,29 +585,27 @@ plot_dmg_lar_correlation <- function(data,
   
   # Determine type for title
   variety_type_label <- data %>%
-    dplyr::pull(Variety_Type) %>%
+    pull(Variety_Type) %>%
     unique()
-  
   variety_title <- case_when(
     all(variety_type_label == "OPV") ~ "Open Pollinated Varieties",
     all(variety_type_label == "HV")  ~ "Hybrid Varieties",
     TRUE                              ~ "Maize Varieties"
   )
-  
   # Prepare correlation data
   cor_data <- data %>%
-    dplyr::filter(Parameter %in% c(param_x, param_y)) %>%
-    tidyr::pivot_wider(names_from = Parameter, values_from = Value_pct) %>%
-    dplyr::group_by(Plant_ID, Variety, WAS, Period) %>%
-    dplyr::summarise(
+    filter(Parameter %in% c(param_x, param_y)) %>%
+    pivot_wider(names_from = Parameter, values_from = Value_pct) %>%
+    group_by(Plant_ID, Variety, WAS, Period) %>%
+     summarise(
       Damage = mean(Damage, na.rm = TRUE),
       Larvae = mean(Larvae, na.rm = TRUE),
       .groups = "drop"
     ) %>%
-    tidyr::drop_na(Damage, Larvae)
+    drop_na(Damage, Larvae)
   
   # Plot
-  ggpubr::ggscatter(
+  ggscatter(
     cor_data,
     x = param_x,
     y = param_y,
@@ -644,7 +633,6 @@ plot_dmg_lar_correlation <- function(data,
       plot.title  = element_text(face = "bold", size = 15)
     )
 }
-
 plot_dmg_lar_correlation(opv_ent_data)
 plot_dmg_lar_correlation(hv_ent_data)
 
@@ -654,7 +642,7 @@ plot_faw_larvae_totals <- function(data,
                                    value_col = "Value_pct",
                                    parameter_name = "Larvae") {
   
-  # Variety label (optional, e.g., OPV / HV)
+  # Variety labeling again
   variety_label <- if (exists("get_variety_type_label")) {
     get_variety_type_label(data)
   } else {
@@ -672,7 +660,6 @@ plot_faw_larvae_totals <- function(data,
       total_all = sum(Value, na.rm = TRUE),
       .groups = "drop"
     )
-  
   bar_plot <- ggplot(larvae_totals_variety,
                      aes(x = Variety, y = total_all, fill = Variety)) +
     geom_col(width = 0.5) +
@@ -689,11 +676,9 @@ plot_faw_larvae_totals <- function(data,
       plot.title  = element_text(face = "bold", size = 15),
       legend.position = "none"
     )
-  
-  # Violin plot of raw larvae distribution
+# Violin plot of raw larvae distribution
   larvae_raw <- larvae_data %>%
     filter(!is.na(Value))
-  
   violin_plot <- ggplot(larvae_raw, aes(x = Variety, y = Value, fill = Variety)) +
     geom_violin(alpha = 0.7, trim = FALSE) +
     scale_fill_manual(values = variety_cols) +
@@ -714,14 +699,16 @@ plot_faw_larvae_totals <- function(data,
 plot_faw_larvae_totals(opv_ent_data)
 plot_faw_larvae_totals(hv_ent_data)
 
-run_glmm_analysis <- function(data, parameter, title_prefix, ylab, ylim_max) {
-  
-  # 1️⃣ Filter data
+# generalised linear mixed model here now to check for significant differences
+run_glmm_analysis <- function(data, 
+                              parameter, 
+                              title_prefix, 
+                              ylab, 
+                              ylim_max) {
   dat <- data %>%
-    dplyr::filter(Parameter == parameter) %>%
-    tidyr::drop_na(Value_pct)
-  
-  # 2️⃣ RAW SUMMARY (Mean + SEM)
+    filter(Parameter == parameter) %>%
+    drop_na(Value_pct)
+  # raw summary (mean + se)
   summary_df <- dat %>%
     group_by(Variety, Period) %>%
     summarise(
@@ -729,40 +716,32 @@ run_glmm_analysis <- function(data, parameter, title_prefix, ylab, ylim_max) {
       se   = sd(Value_pct, na.rm = TRUE) / sqrt(n()),
       .groups = "drop"
     )
-  
-  # 3️⃣ Mixed model for significance
-  mod <- lmer(Value_pct ~ Variety * Period + (1 | Plot), data = dat)
-  
-  # 4️⃣ Estimated marginal means (ONLY for CLD letters)
+  # model
+  mod <- lmer(Value_pct ~ Variety * Period + (1 | Plot), 
+              data = dat)
+  # 4️⃣ Estimated mm
   emm <- emmeans(mod, ~ Variety | Period)
   cld_res <- cld(emm, Letters = letters, adjust = "tukey")
-  
   cld_df <- as.data.frame(cld_res) %>%
     dplyr::select(Variety, Period, .group) %>%
     mutate(.group = gsub(" ", "", .group))
-  
-  # 5️⃣ Merge CLD with raw summary
+  # Merge CLD with raw summary
   plot_df <- left_join(summary_df, cld_df,
                        by = c("Variety", "Period"))
-  
-  # 6️⃣ Plot (RAW MEAN + RAW SEM)
+  # Plot
   plt <- ggplot(plot_df,
                 aes(x = Variety, y = mean, fill = Variety)) +
-    
     geom_col(width = 0.7) +
-    
     geom_errorbar(
       aes(ymin = mean - se, ymax = mean + se),
       width = 0.2,
       linewidth = 0.7
     ) +
-    
     geom_text(
       aes(y = mean + se + (0.05 * ylim_max),
           label = .group),
       size = 5
     ) +
-    
     facet_wrap(
       ~ Period,
       nrow = 2,
@@ -775,30 +754,23 @@ run_glmm_analysis <- function(data, parameter, title_prefix, ylab, ylim_max) {
         )
       )
     ) +
-    
     scale_fill_manual(
       values = variety_cols,
       name = "Variety"
     ) +
-    
     coord_cartesian(ylim = c(0, ylim_max)) +
-    
     scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
-    
     labs(
       title = title_prefix,
       y = ylab,
       x = "Maize Variety"
     ) +
-    
     theme_classic(base_size = 13, base_family = "Times New Roman") +
-    
     theme(
       axis.text.x = element_text(angle = 90, hjust = 1),
       plot.title  = element_text(face = "bold", size = 15),
       strip.text  = element_text(face = "bold")
     )
-  
   return(list(
     data = dat,
     summary = summary_df,
@@ -837,7 +809,6 @@ hv_damage <- run_glmm_analysis(
 )
 hv_damage$plot
 hv_damage$cld
-
 hv_larvae <- run_glmm_analysis(
   data = hv_ent_data,
   parameter = "Larvae",
@@ -848,15 +819,8 @@ hv_larvae <- run_glmm_analysis(
 hv_larvae$plot
 hv_larvae$cld
 
-opv_mat <- opv_dmg_summary %>%
-  dplyr::select(Variety, Period, mean) %>%
-  pivot_wider(names_from = Period, values_from = mean) %>%
-  as.data.frame()
 
-# Set row names
-rownames(opv_mat) <- opv_mat$Variety
-opv_mat$Variety <- NULL
-
+# heat map plots starts here ---
 plot_faw_heatmap <- function(data,
                              variety_col = "Variety",
                              period_col  = "Period",
@@ -869,8 +833,7 @@ plot_faw_heatmap <- function(data,
                              n_colors     = 100,
                              fontsize     = 20,
                              border_color = "grey80") {
-  
-  # Prepare matrix
+
   mat <- data %>%
     dplyr::select(
       !!sym(variety_col),
@@ -886,7 +849,7 @@ plot_faw_heatmap <- function(data,
   rownames(mat) <- mat[[variety_col]]
   mat[[variety_col]] <- NULL
   
-  # Heatmap
+  # Heatmap plot
   pheatmap::pheatmap(
     mat,
     cluster_rows = cluster_rows,
@@ -911,7 +874,6 @@ plot_faw_heatmap(
   fontsize = 11,
   border_color = NA
 )
-
 plot_faw_heatmap(
   data = opv_dmg_summary,
   cluster_rows = TRUE,
@@ -923,7 +885,6 @@ plot_faw_heatmap(
   fontsize = 11,
   border_color = NA
 )
-
 plot_faw_heatmap(
   data = hv_lar_summary,
   cluster_rows = TRUE,
@@ -946,6 +907,9 @@ plot_faw_heatmap(
   fontsize = 11,
   border_color = NA
 )
+
+
+
 
 # Objective 2: to compare the resistance of hybrid and open-pollinated maize varieties to Spodoptera frugiperda ----
 
@@ -1032,10 +996,8 @@ plot_variety_type_trend <- function(data,
                                     title_prefix = "Trend of FAW Damage and Larval Counts") {
   
   trend_summary <- data %>%
-    
-    dplyr::filter(Parameter %in% c("Damage","Larvae")) %>%
-    
-    dplyr::mutate(
+    filter(Parameter %in% c("Damage","Larvae")) %>%
+    mutate(
       Period = factor(
         Period,
         levels = c("8-21 DAS","22-35 DAS","36-49 DAS","50-63 DAS"),
@@ -1044,43 +1006,37 @@ plot_variety_type_trend <- function(data,
       Value = as.numeric(Value_pct)
     ) %>%
     
-    dplyr::group_by(Variety_Type, Period, Parameter) %>%
-    
-    dplyr::summarise(
+    group_by(Variety_Type, Period, Parameter) %>%
+    summarise(
       mean_value = mean(Value, na.rm = TRUE),
       se_value   = sd(Value, na.rm = TRUE) /
         sqrt(sum(!is.na(Value))),
       .groups = "drop"
     ) %>%
-    
-    dplyr::mutate(
+    mutate(
       plot_value = ifelse(Parameter == "Larvae",
                           mean_value * scale_factor,
                           mean_value)
     )
   
   
-  ggplot2::ggplot(
+  ggplot(
     trend_summary,
-    ggplot2::aes(x = Period,
+    aes(x = Period,
                  y = plot_value,
                  color = Parameter,
                  group = Parameter)
   ) +
-    
-    ggplot2::geom_line(size = 1.2) +
-    
-    ggplot2::geom_point(size = 3) +
-    
-    #ggplot2::geom_errorbar(
-      #ggplot2::aes(
+    geom_line(size = 1.2) +
+    geom_point(size = 3) +
+    #geom_errorbar(
+      #aes(
         #ymin = plot_value - se_value,
        # ymax = plot_value + se_value
      # ),
     #  width = 0.15
    # ) +
-    
-    ggplot2::facet_wrap(
+    facet_wrap(
       ~ Variety_Type,
       labeller = ggplot2::labeller(
         Variety_Type = c(
@@ -1089,8 +1045,7 @@ plot_variety_type_trend <- function(data,
         )
       )
     ) +
-    
-    ggplot2::scale_y_continuous(
+    scale_y_continuous(
       name = "Mean Damage (%)",
       limits = c(0,100),
       expand = c(0,0),
@@ -1099,26 +1054,22 @@ plot_variety_type_trend <- function(data,
         name = "Mean Larval Count"
       )
     ) +
-    
-    ggplot2::scale_color_manual(
+    scale_color_manual(
       values = c(
         "Damage" = "#D55E00",
         "Larvae" = "#0072B2"
       )
     ) +
-    
-    ggplot2::labs(
+    labs(
       x = "Days After Sowing (DAS)",
       color = "Parameter",
       title = title_prefix
     ) +
-    
-    ggplot2::theme_classic(
+    theme_classic(
       base_size = 13,
       base_family = "Times New Roman"
     ) +
-    
-    ggplot2::theme(
+    theme(
       strip.text = ggplot2::element_text(face = "bold"),
       plot.title = ggplot2::element_text(face = "bold", size = 15),
       legend.position = "top"
@@ -1128,7 +1079,9 @@ plot_variety_type_trend(
   period_ent_data,
   title_prefix = "Trend of FAW Damage and Larvae in Maize Variety Types"
 )
-# incidence
+
+
+# incidence per variety types
 incidence_variety_type <- period_ent_data %>%
   filter(Parameter == "Damage") %>%
   mutate(incidence = ifelse(Value_pct > 0, 1, 0)) %>%
@@ -1139,9 +1092,7 @@ incidence_variety_type <- period_ent_data %>%
   )
 ggplot(incidence_variety_type,
        aes(x = Variety_Type, y = incidence_pct, fill = Variety_Type)) +
-  
   geom_col(width = 0.4) +
-  
   facet_wrap(
     ~ Period,
     nrow = 2,
@@ -1154,24 +1105,21 @@ ggplot(incidence_variety_type,
       )
     )
   ) +
-  
   scale_fill_manual(
     values = variety_type_cols,
     guide  = "none"
   ) +
-  
   labs(
     title = "FAW Larval Incidence (%) in Open Pollinated and Hybrid Varieties",
     x = "Variety Type",
     y = "Incidence (%)"
   ) +
-  
   theme_classic(base_size = 13, base_family = "Times New Roman") +
-  
   theme(
     plot.title = element_text(face = "bold", size = 15),
     strip.text = element_text(face = "bold")
   )
+
 
 plot_faw_larvae_variety_type_full <- function(data,
                                               value_col = "Value_pct",
@@ -1300,33 +1248,26 @@ plot_faw_larvae_variety_type_full <- function(data,
 
 results <- plot_faw_larvae_variety_type_full(period_ent_data)
 
-# models
+# model
 run_glmm_variety_type <- function(data, 
                                   title_prefix, 
                                   parameter, 
                                   ylab, 
                                   ylim_max) {
-  
-  # 1. Prepare data
   dat <- data %>%
-    dplyr::filter(Parameter == parameter) %>%
-    tidyr::drop_na(Value_pct)
-  
-  # 2. Fit mixed model
+    filter(Parameter == parameter) %>%
+    drop_na(Value_pct)
   mod <- lme4::lmer(
     Value_pct ~ Variety_Type * Period + (1 | Plot),
     data = dat
   )
-  
-  # 3. Estimated marginal means + CLD letters
+  # Estimated marginal means + CLD letters
   emm <- emmeans::emmeans(mod, ~ Variety_Type | Period)
-  
   cld_res <- multcomp::cld(
     emm,
     Letters = letters,
     adjust = "sidak"
   )
-  
   cld_df <- as.data.frame(cld_res)
   
   # 4. Raw mean + SEM for plotting
