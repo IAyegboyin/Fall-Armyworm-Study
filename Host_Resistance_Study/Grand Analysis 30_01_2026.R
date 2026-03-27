@@ -285,11 +285,11 @@ plot_by_period <- function(summary_data,
   ggplot(summary_data,
          aes(x = Variety, y = mean, fill = Variety)) +
     
-    geom_col(width = 0.65) +
+    geom_col(width = 0.35) +
     
     geom_errorbar(
       aes(ymin = mean - se, ymax = mean + se),
-      width = 0.18
+      width = 0.18, linewidth = 0.5
     ) +
     
     facet_wrap(
@@ -309,7 +309,6 @@ plot_by_period <- function(summary_data,
       limits = c(0, ylim_max),
       expand = c(0, 0)
     ) +
-    
     scale_fill_manual(
       values = variety_cols,
       name   = "Variety"
@@ -327,6 +326,7 @@ plot_by_period <- function(summary_data,
       axis.text.x = element_text(angle = 90, hjust = 1),
       plot.title  = element_text(face = "bold", size = 15),
       strip.text  = element_text(face = "bold")
+      #,plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")
     )
 }
 
@@ -359,7 +359,7 @@ plot_by_period(
 
 # Cummulative data plots here capped at 100 % for damage and counts for FAW larvae
 plot_cumulative_damage_cum_larvae <- function(data,
-                                              title_prefix = "Cumulative FAW Damage and Larval Counts") {
+                                              title_prefix = "Cumulative FAW Damage and Larva Counts") {
   
   # 🔹 Clean + correct summarisation
   trend_summary <- data %>%
@@ -414,7 +414,7 @@ plot_cumulative_damage_cum_larvae <- function(data,
       name = "Cumulative Damage (%)",
       expand = c(0,0),
       sec.axis = sec_axis(~./scale_factor,
-                          name = "Cumulative Larval Count")
+                          name = "Cumulative Larva Count")
     ) +
     scale_color_manual(
       values = c(
@@ -545,7 +545,7 @@ plot_dmg_lar_correlation <- function(data,
     cor.method = cor_method,
     shape = point_shape,
     size  = point_size,
-    position = position_jitter(width = 0.5, height = 0.1)
+    position = position_jitter(width = 0.3, height = 0.1)
   ) +
     facet_wrap(~Variety, scales = "free") +
     labs(
@@ -588,11 +588,11 @@ plot_faw_larvae_totals <- function(data,
     )
   bar_plot <- ggplot(larvae_totals_variety,
                      aes(x = Variety, y = total_all, fill = Variety)) +
-    geom_col(width = 0.5) +
+    geom_col(width = 0.35) +
     geom_text(aes(label = round(total_all, 1)), vjust = -0.3, size = 3) +
     scale_fill_manual(values = variety_cols) +
     labs(
-      title = paste("Total FAW Larval Load per Variety on", variety_label, "(1–63 DAS)"),
+      title = paste("Total FAW Larva Load per Variety on", variety_label, "(1–63 DAS)"),
       x = "Variety",
       y = "Total larvae (count)"
     ) +
@@ -657,11 +657,11 @@ run_glmm_analysis <- function(data,
   # Plot
   plt <- ggplot(plot_df,
                 aes(x = Variety, y = mean, fill = Variety)) +
-    geom_col(width = 0.7) +
+    geom_col(width = 0.35) +
     geom_errorbar(
       aes(ymin = mean - se, ymax = mean + se),
-      width = 0.2,
-      linewidth = 0.7
+      width = 0.18,
+      linewidth = 0.5
     ) +
     geom_text(
       aes(y = mean + se + (0.05 * ylim_max),
@@ -794,7 +794,7 @@ plot_faw_heatmap(
   cluster_rows = TRUE,
   cluster_cols = TRUE,
   scale_rows = FALSE,
-  title = "Clustering of Open Pollinated Varieties Based on Larval Infestation",
+  title = "Clustering of Open Pollinated Varieties Based on Larva Infestation",
   palette = c("white","skyblue","blue","black"),
   n_colors = 120,
   fontsize = 11,
@@ -816,7 +816,7 @@ plot_faw_heatmap(
   cluster_rows = TRUE,
   cluster_cols = TRUE,
   scale_rows = FALSE,
-  title = "Clustering of Hybrid Varieties Based on Larval Infestation",
+  title = "Clustering of Hybrid Varieties Based on Larva Infestation",
   palette = c("white","skyblue","blue","black"),
   n_colors = 120,
   fontsize = 11,
@@ -865,11 +865,12 @@ plot_variety_type_by_period <- function(summary_data,
   ggplot(summary_data,
          aes(x = Variety_Type, y = mean, fill = Variety_Type)) +
     
-    geom_col(width = 0.4) +
+    geom_col(width = 0.35) +
     
     geom_errorbar(
       aes(ymin = mean - se, ymax = mean + se),
-      width = 0.2
+      width = 0.18,
+      linewidth = 0.5
     ) +
     
     facet_wrap(
@@ -913,13 +914,13 @@ plot_variety_type_by_period(
 # Larvae
 plot_variety_type_by_period(
   vt_lar_summary,
-  y_label = "Mean Larval Count",
-  base_title = "Comparison of FAW Larval Abundance Between Open Pollinated and Hybrid Varieties"
+  y_label = "Mean Larva Count",
+  base_title = "Comparison of FAW Larva Abundance Between Open Pollinated and Hybrid Varieties"
 )
 
 plot_variety_type_trend <- function(data,
                                     scale_factor = 100,
-                                    title_prefix = "Trend of FAW Damage and Larval Counts") {
+                                    title_prefix = "Trend of FAW Damage and Larva Counts") {
   
   trend_summary <- data %>%
     filter(Parameter %in% c("Damage","Larvae")) %>%
@@ -977,7 +978,7 @@ plot_variety_type_trend <- function(data,
       expand = c(0,0),
       sec.axis = ggplot2::sec_axis(
         ~./scale_factor,
-        name = "Mean Larval Count"
+        name = "Mean Larva Count"
       )
     ) +
     scale_color_manual(
@@ -1018,7 +1019,7 @@ incidence_variety_type <- period_ent_data %>%
   )
 ggplot(incidence_variety_type,
        aes(x = Variety_Type, y = incidence_pct, fill = Variety_Type)) +
-  geom_col(width = 0.4) +
+  geom_col(width = 0.35) +
   facet_wrap(
     ~ Period,
     nrow = 2,
@@ -1036,7 +1037,7 @@ ggplot(incidence_variety_type,
     guide  = "none"
   ) +
   labs(
-    title = "FAW Larval Incidence (%) in Open Pollinated and Hybrid Varieties",
+    title = "FAW Larva Incidence (%) in Open Pollinated and Hybrid Varieties",
     x = "Variety Type",
     y = "Incidence (%)"
   ) +
@@ -1087,7 +1088,7 @@ plot_faw_larvae_variety_type_full <- function(data,
     stat_summary(fun = mean, geom = "point", size = 3, color = "black") +
     scale_fill_manual(values = variety_type_cols) +
     labs(
-      title = "Distribution of FAW Larval Load (1–63 DAS)",
+      title = "Distribution of FAW Larva Load (1–63 DAS)",
       x = "Maize Variety Type",
       y = "Larvae per observation"
     ) +
@@ -1104,14 +1105,14 @@ plot_faw_larvae_variety_type_full <- function(data,
   
   total_plot <- ggplot(total_type,
                        aes(x = Variety_Type, y = total_all, fill = Variety_Type)) +
-    geom_col(width = 0.4) +
+    geom_col(width = 0.2) +
     scale_y_continuous(
       limits = c(0, 300)
     )+
     geom_text(aes(label = round(total_all, 1)), vjust = -0.3, size = 4) +
     scale_fill_manual(values = variety_type_cols) +
     labs(
-      title = "Total FAW Larval Load (1–63 DAS)",
+      title = "Total FAW Larva Load (1–63 DAS)",
       x = "Maize Variety Type",
       y = "Total larvae"
     ) +
@@ -1130,16 +1131,16 @@ plot_faw_larvae_variety_type_full <- function(data,
   
   sem_plot <- ggplot(summary_type,
                      aes(x = Variety_Type, y = mean_count, fill = Variety_Type)) +
-    geom_col(width = 0.4) +
+    geom_col(width = 0.2) +
     geom_errorbar(aes(ymin = mean_count - sem,
                       ymax = mean_count + sem),
-                  width = 0.2) +
+                  width = 0.1, linewidth = 0.5) +
     scale_y_continuous(
       limits = c(0, 0.6)
     ) +
     scale_fill_manual(values = variety_type_cols) +
     labs(
-      title = "Mean FAW Larval Load ± SEM (1–63 DAS)",
+      title = "Mean FAW Larva Load ± SEM (1–63 DAS)",
       x = "Maize Variety Type",
       y = "Mean larvae count"
     ) +
@@ -1202,10 +1203,10 @@ run_glmm_variety_type <- function(data,
     plot_df,
     aes(x = Variety_Type, y = mean, fill = Variety_Type)
   ) +
-    geom_col(width = 0.2) +
+    geom_col(width = 0.35) +
     geom_errorbar(
       aes(ymin = mean - sem, ymax = mean + sem),
-      width = 0.08
+      width = 0.18, linewidth = 0.5
     ) +
     geom_text(aes(y = mean + sem, label = .group),
       vjust = -0.4,
@@ -1253,9 +1254,9 @@ run_glmm_variety_type <- function(data,
     ) +
     theme(
       legend.position = "none",
-      axis.text.x = ggplot2::element_text(angle = 90, hjust = 1),
-      plot.title  = ggplot2::element_text(face = "bold", size = 15),
-      strip.text  = ggplot2::element_text(face = "bold")
+      axis.text.x = element_text(angle = 90, hjust = 1),
+      plot.title  = element_text(face = "bold", size = 15),
+      strip.text  = element_text(face = "bold")
     )
   return(list(
     model = mod,
@@ -1274,7 +1275,7 @@ vt_damage <- run_glmm_variety_type(
 )
 vt_larvae <- run_glmm_variety_type(
   period_ent_data,
-  title_prefix = "Average Larval Count on Maize Varieties",
+  title_prefix = "Average Larva Count on Maize Varieties",
   parameter = "Larvae",
   ylab = "Average Larvae Count",
   ylim_max = 1.2
