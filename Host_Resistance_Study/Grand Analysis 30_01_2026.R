@@ -918,9 +918,9 @@ plot_variety_type_by_period(
   base_title = "Comparison of FAW Larva Abundance Between Open Pollinated and Hybrid Varieties"
 )
 
+# Cummulative plots start here 
 plot_variety_type_trend <- function(data,
-                                    scale_factor = 100,
-                                    title_prefix = "Trend of FAW Damage and Larva Counts") {
+                                    title_prefix = "Cumulative Trend of FAW Damage and Larva Counts") {
   
   trend_summary <- data %>%
     filter(Parameter %in% c("Damage","Larvae")) %>%
@@ -935,77 +935,98 @@ plot_variety_type_trend <- function(data,
     
     group_by(Variety_Type, Period, Parameter) %>%
     summarise(
-      mean_value = mean(Value, na.rm = TRUE),
-      se_value   = sd(Value, na.rm = TRUE) /
-        sqrt(sum(!is.na(Value))),
+      value = if (first(Parameter) == "Larvae") {
+        sum(Value, na.rm = TRUE)   # ✅ total larvae per period
+      } else {
+        mean(Value, na.rm = TRUE)  # ✅ mean damage per period
+      },
       .groups = "drop"
     ) %>%
+    arrange(Variety_Type, Parameter, Period) %>%
+    group_by(Variety_Type, Parameter) %>%
     mutate(
-      plot_value = ifelse(Parameter == "Larvae",
-                          mean_value * scale_factor,
-                          mean_value)
-    )
+      cum_value = cumsum(value),
+      cum_value = ifelse(Parameter == "Damage",
+                         pmin(cum_value, 100),
+                         cum_value)
+    ) %>%
+    ungroup()
   
+  # 🔹 Auto-scale larvae AFTER cumulative
+  max_larvae <- max(
+    trend_summary$cum_value[trend_summary$Parameter == "Larvae"],
+    na.rm = TRUE
+  )
+  
+  scale_factor <- 100 / max_larvae
+  
+  trend_summary <- trend_summary %>%
+    mutate(
+      plot_value = ifelse(
+        Parameter == "Larvae",
+        cum_value * scale_factor,
+        cum_value
+      )
+    )
   
   ggplot(
     trend_summary,
     aes(x = Period,
-                 y = plot_value,
-                 color = Parameter,
-                 group = Parameter)
+        y = plot_value,
+        color = Parameter,
+        group = Parameter)
   ) +
-    geom_line(size = 1.2) +
+    geom_line(linewidth = 1.2) +
     geom_point(size = 3) +
-    #geom_errorbar(
-      #aes(
-        #ymin = plot_value - se_value,
-       # ymax = plot_value + se_value
-     # ),
-    #  width = 0.15
-   # ) +
+    
     facet_wrap(
       ~ Variety_Type,
-      labeller = ggplot2::labeller(
+      labeller = labeller(
         Variety_Type = c(
           "HV"  = "Hybrid",
           "OPV" = "Open Pollinated"
         )
       )
     ) +
+    
     scale_y_continuous(
-      name = "Mean Damage (%)",
-      limits = c(0,100),
+      name = "Cumulative Damage (%)",
       expand = c(0,0),
-      sec.axis = ggplot2::sec_axis(
+      sec.axis = sec_axis(
         ~./scale_factor,
-        name = "Mean Larva Count"
+        name = "Cumulative Larva Count"
       )
     ) +
+    
     scale_color_manual(
       values = c(
         "Damage" = "#D55E00",
         "Larvae" = "#0072B2"
       )
     ) +
+    
     labs(
       x = "Days After Sowing (DAS)",
       color = "Parameter",
       title = title_prefix
     ) +
+    
     theme_classic(
       base_size = 13,
       base_family = "Times New Roman"
     ) +
     theme(
-      strip.text = ggplot2::element_text(face = "bold"),
-      plot.title = ggplot2::element_text(face = "bold", size = 15),
+      strip.text = element_text(face = "bold"),
+      plot.title = element_text(face = "bold", size = 15),
       legend.position = "top"
     )
 }
 plot_variety_type_trend(
   period_ent_data,
-  title_prefix = "Trend of FAW Damage and Larvae in Maize Variety Types"
+  title_prefix = "Cumulative FAW Damage and Larvae in Maize Variety Types"
 )
+# Cummulative plots end here 
+
 
 
 # incidence per variety types
@@ -1160,6 +1181,7 @@ plot_faw_larvae_variety_type_full <- function(data,
 
 results <- plot_faw_larvae_variety_type_full(period_ent_data)
 
+
 # model
 run_glmm_variety_type <- function(data, 
                                   title_prefix, 
@@ -1203,19 +1225,19 @@ run_glmm_variety_type <- function(data,
     plot_df,
     aes(x = Variety_Type, y = mean, fill = Variety_Type)
   ) +
-    geom_col(width = 0.35) +
+    geom_col(width = 0.2) +
     geom_errorbar(
       aes(ymin = mean - sem, ymax = mean + sem),
-      width = 0.18, linewidth = 0.5
+      width = 0.1, linewidth = 0.5
     ) +
     geom_text(aes(y = mean + sem, label = .group),
       vjust = -0.4,
-      size = 6,
+      size = 5,
       color = "black"
     ) +
     facet_wrap(
       ~ Period,
-      nrow = 1,
+      nrow = 2,
       labeller = labeller(
         Period = c(
           "8-21 DAS"  = "8–21 DAS",
@@ -1270,14 +1292,14 @@ vt_damage <- run_glmm_variety_type(
   period_ent_data,
   title_prefix = "Damage Severity on Maize Varieties",
   parameter = "Damage",
-  ylab = "Damage (%)",
+  ylab = "Mean Damage (%)",
   ylim_max = 90
 )
 vt_larvae <- run_glmm_variety_type(
   period_ent_data,
   title_prefix = "Average Larva Count on Maize Varieties",
   parameter = "Larvae",
-  ylab = "Average Larvae Count",
+  ylab = "Mean Larvae Count",
   ylim_max = 1.2
 )
 vt_damage$plot

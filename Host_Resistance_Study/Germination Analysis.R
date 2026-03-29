@@ -34,10 +34,8 @@ germi_final <- germi %>%
   mutate(Germination = final_prop)
 
 run_germination_type_model <- function(data, type_label){
-  
   dat <- data %>%
     filter(Variety_Type == type_label)
-  
   # Summary statistics
   summary_df <- dat %>%
     group_by(Variety) %>%
@@ -46,27 +44,22 @@ run_germination_type_model <- function(data, type_label){
       se = sd(Germination, na.rm = TRUE)/sqrt(n()),
       .groups = "drop"
     )
-  
   # Mixed model
   mod <- glmer(
     Germination ~ Variety + (1|Plot),
     family = binomial,
     data = dat
   )
-  
   # Estimated marginal means
   emm <- emmeans(mod, ~ Variety, type = "response")
-  
   cld_res <- cld(
     emm,
     Letters = letters,
     adjust = "tukey"
   )
-  
   cld_df <- as.data.frame(cld_res) %>%
     dplyr::select(Variety, .group) %>%
     mutate(.group = gsub(" ","",.group))
-  
   plot_df <- left_join(summary_df, cld_df, by="Variety")
   
   # Plot
@@ -74,39 +67,30 @@ run_germination_type_model <- function(data, type_label){
     plot_df,
     aes(x = Variety, y = mean, fill = Variety)
   ) +
-    
-    geom_col(width = 0.7) +
-    
+    geom_col(width = 0.30) +
     geom_errorbar(
       aes(ymin = mean - se,
           ymax = mean + se),
-      width = 0.2
+      width = 0.15
     ) +
-    
     geom_text(
       aes(y = mean + se + 0.05,
           label = .group),
       size = 5
     ) +
-    
     scale_fill_manual(values = variety_cols) +
-    
     coord_cartesian(ylim=c(0,1)) +
-    
     labs(
       title = paste("Germination Success of", type_label, "Maize Varieties"),
       y = "Germination proportion",
       x = "Maize Variety"
     ) +
-    
     theme_classic(base_family="Times New Roman") +
-    
     theme(
       axis.text.x = element_text(angle = 90, hjust=1),
       legend.position="none",
       plot.title = element_text(face="bold")
     )
-  
   return(list(
     data = dat,
     summary = summary_df,
@@ -131,9 +115,7 @@ hv_germination$plot
 hv_germination$cld
 
 run_germination_variety_type_model <- function(data){
-  
   dat <- data
-  
   # Summary statistics
   summary_df <- dat %>%
     group_by(Variety_Type) %>%
@@ -142,68 +124,53 @@ run_germination_variety_type_model <- function(data){
       se = sd(Germination, na.rm = TRUE)/sqrt(n()),
       .groups = "drop"
     )
-  
   # Correct binomial model
   mod <- glm(
     cbind(Emergence_20, 2 - Emergence_20) ~ Variety_Type,
     family = binomial,
     data = dat
   )
-  
   # Estimated marginal means
   emm <- emmeans(mod, ~ Variety_Type, type = "response")
-  
   cld_res <- cld(
     emm,
     Letters = letters
   )
-  
   cld_df <- as.data.frame(cld_res) %>%
     dplyr::select(Variety_Type, .group) %>%
     mutate(.group = gsub(" ","",.group))
-  
   plot_df <- left_join(summary_df, cld_df, by="Variety_Type")
-  
   # Plot
   plt <- ggplot(
     plot_df,
     aes(x = Variety_Type, y = mean, fill = Variety_Type)
   ) +
-    
-    geom_col(width = 0.4) +
-    
+    geom_col(width = 0.20) +
     geom_errorbar(
       aes(ymin = mean - se,
           ymax = mean + se),
-      width = 0.2
+      width = 0.08, linewidth = 0.6
     ) +
-    
     geom_text(
       aes(y = mean + se + 0.05,
           label = .group),
       size = 5
     ) +
-    
     scale_fill_manual(values = c(
       "Open Pollinated" = "#d95f02",
       "Hybrid"  = "#66a61e"
     )) +
-    
     coord_cartesian(ylim = c(0,1)) +
-    
     labs(
       title = "Germination Comparison of Maize Variety Types",
-      y = "Mean Germination",
+      y = "Mean Germination Proportion",
       x = "Variety Type"
     ) +
-    
     theme_classic(base_family = "Times New Roman") +
-    
     theme(
       legend.position = "none",
       plot.title = element_text(face = "bold")
     )
-  
   return(list(
     data = dat,
     summary = summary_df,
@@ -215,6 +182,6 @@ run_germination_variety_type_model <- function(data){
 
 type_germination <- run_germination_variety_type_model(
   data = germi_final
-)
+  )
 type_germination$plot
 type_germination$cld

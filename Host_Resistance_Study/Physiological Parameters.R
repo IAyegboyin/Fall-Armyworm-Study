@@ -120,17 +120,15 @@ run_physio_mixed_analysis <- function(data,
   # 5️⃣ Merge CLD with raw summary
   plot_df <- left_join(summary_df, cld_df,
                        by = c("Variety", "Period"))
-  
-  # 6️⃣ Plot
   plt <- ggplot(plot_df,
                 aes(x = Variety, y = mean, fill = Variety)) +
     
-    geom_col(width = 0.7) +
+    geom_col(width = 0.35) +
     
     geom_errorbar(
       aes(ymin = mean - se, ymax = mean + se),
-      width = 0.2,
-      linewidth = 0.7
+      width = 0.16,
+      linewidth = 0.5
     ) +
     
     geom_text(
@@ -247,8 +245,8 @@ run_physio_type_analysis <- function(data,
   
   # 1️⃣ Filter data
   dat <- data %>%
-    dplyr::filter(variable == parameter) %>%
-    tidyr::drop_na(value)
+   filter(variable == parameter) %>%
+   drop_na(value)
   
   # 2️⃣ Raw summary
   summary_df <- dat %>%
@@ -283,12 +281,12 @@ run_physio_type_analysis <- function(data,
   plt <- ggplot(plot_df,
                 aes(x = Variety_Type, y = mean, fill = Variety_Type)) +
     
-    geom_col(width = 0.6) +
+    geom_col(width = 0.3) +
     
     geom_errorbar(
       aes(ymin = mean - se, ymax = mean + se),
-      width = 0.15,
-      linewidth = 0.7
+      width = 0.1,
+      linewidth = 0.6
     ) +
     
     geom_text(
